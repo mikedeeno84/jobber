@@ -2,11 +2,15 @@
 
 var Sequelize = require('sequelize');
 
+
 module.exports = function(db) {
   var Stage = db.define('stage', {
     jobId: {
       type: Sequelize.UUID,
-      field:"job_id"
+      references:{
+        model:'job',
+        key:'uuid',
+      },
     },
     stageName: {
       type:Sequelize.STRING,

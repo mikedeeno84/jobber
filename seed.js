@@ -48,21 +48,24 @@ function newStage(jobId) {
     notes: chance.paragraph({ sentences: 1 }),
   }
   stage.completed = stage.date < Date.now();
-  if (completed) {
+  if (stage.completed) {
     stage.followedUp = chance.bool();
   } else stage.followedUp = false;
+  return stage;
 };
 
 function newApp(stageId, jobId) {
   var application = {
-  	stageId:stageId,
-  	jobId:job_Id,
-  	dateApplied: chance.date({year:2016})
+    stageId: stageId,
+    jobId: jobId,
+    dateApplied: chance.date({ year: 2016 })
   };
+  return application
 };
 
 var models = require('./database')
-var Job, company, Application, Contact, Stage, companyList, contactList;
+var Job, company, Application, Contact, Stage, companyList, contactList, stageList, applications, jobList;
+var seedStage ="";
 // connect to DB;
 models.then(function(models) {
     // set models to variables on outer scope
@@ -71,12 +74,20 @@ models.then(function(models) {
     Application = models.Application;
     Contact = models.Contact;
     Stage = models.Stage;
-
-    // create x number of random companies
+    syncDb = Object.keys(models).map(function(model) {
+      console.log(model)
+      seedStage = 'sync model: ' + model;
+      return models[model].sync();
+    })
+    return Promise.map(syncDb,{concurrency:1});
+  }).then(function() {
+    seedStage = "Before create companies"
+      // create x number of random companies
     return createXCompanies(4, Company);
   })
   .then(function(things) {
-    // set company list variable so we can access it later;
+    seedStage = "Before create contacts"
+      // set company list variable so we can access it later;
     companyList = things.map(function(doc) {
       return doc.dataValues;
     })
@@ -91,38 +102,52 @@ models.then(function(models) {
     return Contact.bulkCreate(newPersons);
   })
   .then(function(newPersons) {
-    // set contact list so we can access it later (if needed)
+    seedStage = "Before create jobs"
+      // set contact list so we can access it later (if needed)
     contactList = newPersons.map(function(person) {
-      person.dataValues;
+      return person.dataValues;
     });
 
     // list of new job objects
-    var jobList = companyList.map(function(company) {
+    var newJobs = companyList.map(function(company) {
       var job = newJob(company.uuid);
       return job;
     })
 
     // create jobs
-    return Job.bulkCreate(jobList);
+    return Job.bulkCreate(newJobs);
   })
   .then(function(newJobs) {
-    var stages = [];
+    seedStage = "Before create stages"
+    newStages = [];
+    jobList = [];
     newJobs.forEach(function(jobDoc) {
       var job = jobDoc.dataValues;
-    // create random application stage for jobs that have been applied to 
-      if (job.applied) stages.push(newStage(job.uuid));
+      jobList.push(job);
+      // create random application stage for jobs that have been applied to 
+      if (job.applied) newStages.push(newStage(job.uuid));
     });
-    return Stage.bulkCreate(stages);
+    console.log(newStages)
+    return Stage.bulkCreate(newStages);
   })
   .then(function(newStages) {
-
-  	// create application for every single job that has been applied to
-  	var applications = newStages.map(function(stageDoc){
-  		var stage = stageDoc.dataValues;
-  		return newApp(stage.jobId, stage.uuid);
-  	})
-  	return Application.bulkCreate(applications);
+    seedStage = "Before create applications"
+      // create application for every single job that has been applied to
+    var newApps = []
+    newStages.forEach(function(stageDoc) {
+      var stage = stageDoc.dataValues;
+      stageList = [];
+      stageList.push(stage);
+      newApps.push(newApp(stage.jobId, stage.uuid));
+    })
+    return Application.bulkCreate(newApps);
+  })
+  .then(function(appDocs) {
+    applications = appDocs.map(function(appDoc) {
+      return appDoc.dataValues;
+    })
+    console.log("Great SUCCESS!!!!");
   })
   .catch(function(err) {
-    console.log('seed failed', err)
+    console.log('seed failed ' + err + ' at ' + seedStage);
   });
