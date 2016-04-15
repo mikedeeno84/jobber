@@ -4,18 +4,20 @@ var Sequelize = require('sequelize');
 
 module.exports = function(db) {
   var Job = db.define('Job', {
-    companyName: {
-      type: Sequelize.STRING,
-      field: 'company_name',
+    companyId: {
+      type: Sequelize.UUID,
     },
     applied: {
-      type: Sequelize.BOOLEAN
+      type: Sequelize.BOOLEAN,
     },
-    dateApplied: {
-      type: Sequelize.DATEONLY,
-      field: "date_applied"
+    title:{
+      type:Sequelize.STRING,
     },
-    app_id:Sequelize.UUID,
+    uuid: {
+      type: Sequelize.UUID,
+      defaultValue: Sequelize.UUIDV1,
+      primaryKey: true
+    },
   })
   return Job;
 }
