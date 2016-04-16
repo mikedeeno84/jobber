@@ -18,6 +18,6 @@ var startServer = function(){
  })
 
 }
-require('../database');
-createApplication();
-startServer();
+require('../database')
+	.then(createApplication())
+	.then(startServer());
