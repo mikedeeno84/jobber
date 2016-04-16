@@ -4,14 +4,8 @@ var Sequelize = require('sequelize');
 
 
 module.exports = function(db) {
+  // belongs to application
   var Stage = db.define('stage', {
-    jobId: {
-      type: Sequelize.UUID,
-      references:{
-        model:'job',
-        key:'uuid',
-      },
-    },
     stageName: {
       type:Sequelize.STRING,
       field:"stage_name"

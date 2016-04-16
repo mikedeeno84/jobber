@@ -4,13 +4,7 @@ var Sequelize = require('sequelize');
 
 module.exports = function(db) {
   var Contact = db.define('contact', {
-    companyId: {
-      type: Sequelize.UUID,
-      references:{
-        model:'company',
-        key:'uuid',
-      },
-    },
+    // belongs to company
     firstName: {
       type: Sequelize.STRING,
       field: "first_name"
@@ -18,11 +12,6 @@ module.exports = function(db) {
     lastName: {
       type: Sequelize.STRING,
       field: "last_name"
-    },
-    uuid: {
-      type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV1,
-      primaryKey: true
     },
     email:Sequelize.STRING,
     title:Sequelize.STRING,

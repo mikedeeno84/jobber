@@ -4,20 +4,10 @@ var Sequelize = require('sequelize');
 
 module.exports = function(db) {
   var Application = db.define('application', {
-    jobId: {
-      type: Sequelize.UUID,
-      references:{
-        model:'job',
-        key:'uuid',
-      },
-    },
-    stageId: {
-      type: Sequelize.UUID,
-      references:{
-        model:'stage',
-        key:'uuid'
-      }
-    },
+// will likely add more!
+
+// belongs to job
+// has many stages
     dateApplied: {
       type: Sequelize.DATE,
       field: "date_applied"
